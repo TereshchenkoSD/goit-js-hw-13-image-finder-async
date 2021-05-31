@@ -1,6 +1,8 @@
-const BASE_URL = `https://pixabay.com/api/`;
+import axios from 'axios';
 
 const API_KEY = '21751428-6a671782556cc1e6de8f90ab7';
+
+axios.defaults.baseURL = `https://pixabay.com/api/`;
 
 export default class ImagesApiService {
   constructor() {
@@ -9,14 +11,12 @@ export default class ImagesApiService {
   }
 
   fetchImages() {
-    const url = `${BASE_URL}?image_type=photo&orientation=horizontal&q=${this.searchQuery}&page=${this.page}&per_page=12&key=${API_KEY}`;
-    return fetch(url)
-      .then(response => response.json())
-      .then(({ hits }) => {
-        this.incrementPage();
-        console.log(this);
-        return hits;
-      });
+    const url = `?image_type=photo&orientation=horizontal&q=${this.searchQuery}&page=${this.page}&per_page=12&key=${API_KEY}`;
+
+    return axios
+      .get(url)
+      .then(response => response.data.hits)
+      .catch(error => console.log(error));
   }
 
   get query() {

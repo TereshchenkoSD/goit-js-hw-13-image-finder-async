@@ -1,5 +1,6 @@
 import ImagesApiService from './components/apiService';
 import LoadMoreBtn from './components/loadMoreBtn';
+import onModalOpen from './components/modal';
 import getRefs from './getRefs';
 import { error } from '@pnotify/core';
 import galleryTpl from '../templates/gallery.hbs';
@@ -13,6 +14,8 @@ const loadMoreBtn = new LoadMoreBtn({
   selector: '[data-action="load-more"]',
   hidden: true,
 });
+
+refs.galleryList.addEventListener('click', onModalOpen);
 
 refs.searchInput.addEventListener('input', debounce(onSearch, 500));
 loadMoreBtn.refs.button.addEventListener('click', onLoadMore);
@@ -40,15 +43,16 @@ function fetchImages() {
 
   return imagesApiService
     .fetchImages()
-    .then(data => {
+    .then(images => {
       setTimeout(() => {
-        renderImages(data), loadMoreBtn.enable();
+        renderImages(images), loadMoreBtn.enable();
       }, 300);
     })
     .catch(handleFetchError);
 }
 
 const renderImages = images => {
+  console.log(images);
   const imagesQuantity = images.length;
   if (imagesQuantity === 0) {
     loadMoreBtn.hide();
