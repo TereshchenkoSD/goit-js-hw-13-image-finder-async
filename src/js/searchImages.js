@@ -1,5 +1,4 @@
 import ImagesApiService from './components/apiService';
-import LoadMoreBtn from './components/loadMoreBtn';
 import onModalOpen from './components/modal';
 import getRefs from './getRefs';
 import { error } from '@pnotify/core';
@@ -10,15 +9,10 @@ import '@pnotify/core/dist/PNotify.css';
 
 const refs = getRefs();
 const imagesApiService = new ImagesApiService();
-const loadMoreBtn = new LoadMoreBtn({
-  selector: '[data-action="load-more"]',
-  hidden: true,
-});
 
 refs.galleryList.addEventListener('click', onModalOpen);
 
 refs.searchInput.addEventListener('input', debounce(onSearch, 500));
-loadMoreBtn.refs.button.addEventListener('click', onLoadMore);
 
 function onSearch(e) {
   onInputClear();
@@ -27,7 +21,6 @@ function onSearch(e) {
   if (!imagesApiService.query) {
     return;
   } else {
-    loadMoreBtn.show();
     imagesApiService.resetPage();
     fetchImages();
   }
@@ -35,18 +28,16 @@ function onSearch(e) {
 
 const onInputClear = () => {
   refs.galleryList.innerHTML = '';
-  loadMoreBtn.hide();
+  observer.disconnect(refs.sentinel);
 };
 
 function fetchImages() {
-  loadMoreBtn.disable();
-
   return imagesApiService
     .fetchImages()
     .then(images => {
-      setTimeout(() => {
-        renderImages(images), loadMoreBtn.enable();
-      }, 300);
+      renderImages(images);
+      imagesApiService.incrementPage();
+      observer.observe(refs.sentinel);
     })
     .catch(handleFetchError);
 }
@@ -55,7 +46,6 @@ const renderImages = images => {
   console.log(images);
   const imagesQuantity = images.length;
   if (imagesQuantity === 0) {
-    loadMoreBtn.hide();
     handleFetchError();
   }
 
@@ -75,17 +65,16 @@ function handleFetchError() {
   });
 }
 
-function onLoadMore() {
-  fetchImages();
-  scrollGallery();
-}
+const onEntry = entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && imagesApiService.query !== '') {
+      fetchImages();
+    }
+  });
+};
 
-function scrollGallery() {
-  const totalScrollHeight = refs.galleryList.clientHeight + 100;
-  setTimeout(() => {
-    window.scrollTo({
-      top: totalScrollHeight,
-      behavior: 'smooth',
-    });
-  }, 500);
-}
+const options = {
+  rootMargin: '300px',
+};
+
+const observer = new IntersectionObserver(onEntry, options);
