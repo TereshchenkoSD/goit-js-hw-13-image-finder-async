@@ -16,7 +16,7 @@ refs.searchInput.addEventListener('input', debounce(onSearch, 500));
 
 function onSearch(e) {
   onInputClear();
-  imagesApiService.query = e.target.value;
+  imagesApiService.query = e.target.value.trim();
 
   if (!imagesApiService.query) {
     return;
