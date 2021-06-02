@@ -10,13 +10,12 @@ export default class ImagesApiService {
     this.page = 1;
   }
 
-  fetchImages() {
+  async fetchImages() {
     const url = `?image_type=photo&orientation=horizontal&q=${this.searchQuery}&page=${this.page}&per_page=12&key=${API_KEY}`;
 
-    return axios
-      .get(url)
-      .then(response => response.data.hits)
-      .catch(error => console.log(error));
+    const response = await axios.get(url);
+
+    return response.data.hits;
   }
 
   get query() {

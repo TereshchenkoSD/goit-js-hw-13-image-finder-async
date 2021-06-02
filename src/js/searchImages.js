@@ -31,15 +31,15 @@ const onInputClear = () => {
   observer.disconnect(refs.sentinel);
 };
 
-function fetchImages() {
-  return imagesApiService
-    .fetchImages()
-    .then(images => {
-      renderImages(images);
-      imagesApiService.incrementPage();
-      observer.observe(refs.sentinel);
-    })
-    .catch(handleFetchError);
+async function fetchImages() {
+  try {
+    const images = await imagesApiService.fetchImages();
+    renderImages(images);
+    imagesApiService.incrementPage();
+    observer.observe(refs.sentinel);
+  } catch (error) {
+    handleFetchError(error);
+  }
 }
 
 const renderImages = images => {
@@ -61,7 +61,7 @@ function handleFetchError() {
   error({
     text: 'Invalid request',
     hide: true,
-    delay: 1500,
+    delay: 1000,
   });
 }
 
